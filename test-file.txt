@@ -1,0 +1,5 @@
+Ceci est un fichier de test pour le transfert sécurisé.
+Hello World!
+Test de chiffrement AES et hachage SHA-256.
+Ligne 4 du fichier de test.
+

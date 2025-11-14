@@ -1,0 +1,16 @@
+# Fichiers compilés
+bin/
+*.class
+
+# Dossier de réception des fichiers
+uploads/
+
+# Fichiers IDE
+.idea/
+*.iml
+.vscode/
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
