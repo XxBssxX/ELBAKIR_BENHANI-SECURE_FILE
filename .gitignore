@@ -2,12 +2,9 @@
 bin/
 *.class
 
-# Dossier de réception des fichiers
-uploads/
+# Fichiers générés pendant l'exécution
 received_*
-
-# Clé partagée
-shared_key.txt
+*.log
 
 # Fichiers IDE
 .idea/
@@ -18,5 +15,5 @@ shared_key.txt
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
+# Secrets/clefs
+shared_key.txt
