@@ -1,4 +1,4 @@
-# Système de Transfert de Fichiers Sécurisé
+ # Système de Transfert de Fichiers Sécurisé
 
 Application Client-Serveur pour le transfert de fichiers sécurisé utilisant le protocole TCP avec chiffrement AES et vérification d'intégrité SHA-256.
 
@@ -10,7 +10,6 @@ Le système est composé de plusieurs composants :
 - **ClientTransferHandler** : Thread gérant la communication avec un client spécifique (3 phases du protocole)
 - **SecureFileClient** : Client en ligne de commande pour envoyer des fichiers
 - **CryptoUtils** : Utilitaires pour le chiffrement AES et le hachage SHA-256
-- **Authenticator** : Gestion de l'authentification des utilisateurs
 
 ## Protocole de Communication
 
@@ -33,7 +32,7 @@ Le système implémente un protocole en 3 phases :
   - Reçoit les données chiffrées
   - Les déchiffre avec AES
   - Vérifie l'intégrité avec le hachage SHA-256
-  - Enregistre le fichier dans le dossier `uploads/`
+  - Enregistre le fichier (préfixe `received_`)
   - Répond `TRANSFER_SUCCESS` ou `TRANSFER_FAIL`
 
 ## Sécurité
@@ -42,110 +41,78 @@ Le système implémente un protocole en 3 phases :
 - **Algorithme** : AES (Advanced Encryption Standard)
 - **Mode** : AES/ECB/PKCS5Padding
 - **Taille de clé** : 256 bits
-- **Gestion de la clé** : Clé prédéfinie partagée entre client et serveur (voir section "Améliorations possibles")
+- **Gestion de la clé** : Clé prédéfinie partagée entre client et serveur via `shared_key.txt`
 
 ### Intégrité
 - **Algorithme de hachage** : SHA-256
-- Vérification de l'intégrité avant et après le transfert
+- Vérification de l'intégrité après déchiffrement
 
-## Compilation
+## Guide d’exécution
 
-### Prérequis
-- Java JDK 8 ou supérieur
+Toutes les commandes sont à lancer dans le terminal PowerShell.
 
-### Compilation du projet
-
-```bash
-# Compiler tous les fichiers Java
-javac -d bin src/com/securefiletransfer/*.java
+### 1. Compilation (chaque machine Java)
+```powershell
+cd "C:\Users\HP\Documents\Java Avancé\Système de transfert de fichiers sécurisé"
+if (!(Test-Path bin)) { New-Item -ItemType Directory -Path bin | Out-Null }
+$sources = Get-ChildItem -Path src -Recurse -Filter *.java | ForEach-Object { $_.FullName }
+javac -d bin -encoding UTF-8 $sources
 ```
 
-## Utilisation
-
-### 1. Démarrer le serveur
-
-```bash
-# Depuis le répertoire racine du projet
-java -cp bin com.securefiletransfer.SecureFileServer [port]
-
-# Exemple (port par défaut: 8888)
-java -cp bin com.securefiletransfer.SecureFileServer
-# ou avec un port personnalisé
-java -cp bin com.securefiletransfer.SecureFileServer 9999
+### 2. Lancer le serveur (machine locale)
+```powershell
+cd "C:\Users\HP\Documents\Java Avancé\Système de transfert de fichiers sécurisé\bin"
+java server.SecureFileServer 8888
 ```
+Laissez cette fenêtre ouverte. Notez l’adresse IP (via `ipconfig` si besoin). Copiez `shared_key.txt` vers les clients distants.
 
-Le serveur affichera :
+### 3. Lancer le client (même machine ou distante)
+```powershell
+cd "C:\Users\HP\Documents\Java Avancé\Système de transfert de fichiers sécurisé\bin"
+java client.SecureFileClient
 ```
-Serveur démarré sur le port 8888
-En attente de connexions...
-```
-
-### 2. Envoyer un fichier avec le client
-
-```bash
-# Syntaxe
-java -cp bin com.securefiletransfer.SecureFileClient <serverAddress> <port> <login> <password> <filePath>
-
-# Exemple
-java -cp bin com.securefiletransfer.SecureFileClient localhost 8888 admin admin123 C:\monfichier.txt
-```
-
-### Utilisateurs par défaut
-
-Le système inclut quelques utilisateurs de test :
-- `admin` / `admin123`
-- `user1` / `password1`
-- `test` / `test123`
+Le client demande l’IP du serveur (ex. `127.0.0.1` ou une IPv4 du réseau), le port (`8888`), le login/mot de passe et un chemin absolu vers le fichier à envoyer.
 
 ## Structure du Projet
 
 ```
 Project/
 ├── src/
-│   └── com/
-│       └── securefiletransfer/
-│           ├── SecureFileServer.java      # Serveur principal
-│           ├── ClientTransferHandler.java # Handler pour chaque client
-│           ├── SecureFileClient.java      # Client CLI
-│           ├── CryptoUtils.java           # Utilitaires cryptographiques
-│           └── Authenticator.java         # Gestion de l'authentification
-├── bin/                                    # Fichiers compilés (.class)
-├── uploads/                                # Dossier de réception (créé automatiquement)
-└── README.md                               # Ce fichier
+│   ├── server/
+│   │   ├── SecureFileServer.java
+│   │   ├── ClientTransferHandler.java
+│   │   └── UserCredentials.java
+│   ├── client/
+│   │   └── SecureFileClient.java
+│   └── crypto/
+│       ├── CryptoUtils.java
+│       └── KeyManager.java
+├── bin/                   # Fichiers compilés (.class)
+├── shared_key.txt         # Clé AES partagée
+└── README.md
 ```
 
 ## Fonctionnalités
 
-✅ **Concurrence** : Le serveur gère plusieurs clients simultanément grâce aux threads  
-✅ **Authentification** : Système de login/password  
-✅ **Chiffrement** : Transfert de fichiers chiffrés avec AES  
-✅ **Intégrité** : Vérification SHA-256 pour garantir l'intégrité des fichiers  
-✅ **Protocole structuré** : Communication en 3 phases bien définies  
-✅ **Gestion d'erreurs** : Gestion robuste des erreurs et fermeture propre des connexions  
+✅ **Concurrence** : threads par client  
+✅ **Authentification** : login/password  
+✅ **Chiffrement** : AES-256 (ECB/PKCS5Padding)  
+✅ **Intégrité** : SHA-256  
+✅ **Protocole structuré** : 3 phases  
 
-## Améliorations Possibles
+## Améliorations possibles
 
-### Sécurité
-1. **Échange de clés sécurisé** : Implémenter un échange de clés Diffie-Hellman ou RSA pour éviter d'avoir une clé prédéfinie
-2. **Authentification renforcée** : Utiliser des mots de passe hashés (bcrypt, Argon2) au lieu de stockage en clair
-3. **Mode de chiffrement** : Remplacer ECB par CBC ou GCM (plus sécurisé)
-4. **TLS/SSL** : Ajouter une couche TLS pour sécuriser la connexion TCP
+- Échange de clé sécurisé (Diffie-Hellman/RSA)
+- Stockage sécurisé des mots de passe (hachage)
+- Mode de chiffrement plus robuste (CBC ou GCM)
+- TLS/SSL pour la connexion TCP
 
-### Fonctionnalités
-1. **Base de données** : Remplacer le stockage en dur des utilisateurs par une base de données
-2. **Interface graphique** : Créer une interface graphique pour le client
-3. **Transfert de plusieurs fichiers** : Permettre le transfert de plusieurs fichiers en une session
-4. **Progression du transfert** : Afficher une barre de progression pour les gros fichiers
-5. **Gestion des permissions** : Système de permissions pour les utilisateurs
+## GROUPE
+Projet réalisé par **ELBAKIR Bassam** et **BENHANI Mohammed**  
+Encadrant : **Mr. BENTAJER Ahmed**
 
-## Notes Techniques
-
-- Le serveur crée automatiquement le dossier `uploads/` pour stocker les fichiers reçus
-- Les fichiers sont déchiffrés avant d'être enregistrés
-- La vérification d'intégrité se fait après le déchiffrement
-- Le serveur peut être arrêté proprement avec Ctrl+C
-
-## Auteur
-
-Projet réalisé dans le cadre du cours Java Avancé.
-
+### Identifiants de test
+```
+bassam    bassam123
+mohammed  mohammed123
+```

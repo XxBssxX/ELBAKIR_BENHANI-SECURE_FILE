@@ -4,6 +4,10 @@ bin/
 
 # Dossier de réception des fichiers
 uploads/
+received_*
+
+# Clé partagée
+shared_key.txt
 
 # Fichiers IDE
 .idea/
@@ -14,3 +18,5 @@ uploads/
 .DS_Store
 Thumbs.db
 
+# Logs
+*.log
