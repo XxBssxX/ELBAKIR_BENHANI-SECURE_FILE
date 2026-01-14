@@ -1,4 +1,7 @@
-Projet realisé par : ELBAKIR Bassam et BENHANI Mohammed
+Projet realisé par : 
+- ELBAKIR Bassam
+- BENHANI Mohammed
+- AIT TALEB Marouane
 Encadré par : Mr.BENTAJER Ahmed
 
 Demarrer le server :   cd bin  puis  java server.SecureFileServer  8888
